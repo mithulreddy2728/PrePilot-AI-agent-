@@ -252,17 +252,21 @@ CODING_QUESTIONS = [
 def seed_data(db: Session):
     """Seed the database with demo data."""
     # Seed admin user
-    admin = db.query(User).filter(User.email == "admin@preppilot.local").first()
+    admin = db.query(User).filter((User.email == "admin@preppilot.com") | (User.email == "admin@preppilot.local")).first()
     if not admin:
         admin = User(
-            email="admin@preppilot.local",
+            email="admin@preppilot.com",
             password_hash=hash_password("PrepPilot#2026"),
             full_name="PrepPilot Admin",
             is_admin=True,
             is_verified=True,
         )
         db.add(admin)
-        logger.info("Created admin user: admin@preppilot.local")
+        logger.info("Created admin user: admin@preppilot.com")
+    elif admin.email == "admin@preppilot.local":
+        admin.email = "admin@preppilot.com"
+        admin.password_hash = hash_password("PrepPilot#2026")
+        db.add(admin)
 
     # Seed companies
     for c_data in COMPANIES:
