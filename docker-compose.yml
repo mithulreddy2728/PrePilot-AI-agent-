@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./preppilot.db
+      - JWT_SECRET_KEY=preppilot-super-secret-key-production-ready-2026-xyz
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - FRONTEND_BASE_URL=http://localhost:8000
+      - ALLOWED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000
+      - SEED_DEMO_DATA=true
+    volumes:
+      - ./uploads:/app/uploads
+      - preppilot_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  preppilot_data:
