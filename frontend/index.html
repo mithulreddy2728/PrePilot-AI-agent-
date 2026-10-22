@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PrepPilot AI — AI Placement Preparation Platform</title>
-  <meta name="description" content="AI placement preparation platform powered by FastAPI and Google Gemini AI. Resume ATS score, mock interviews, coding arena, and study roadmaps.">
+  <meta name="description" content="AI placement preparation platform powered by FastAPI and Google Gemini AI. Resume ATS score, mock interviews, company-specific coding questions, and study roadmaps.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20width=%22100%22%20height=%22100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
   
   <!-- Google Fonts -->
@@ -65,17 +65,19 @@
     <div class="d-flex align-items-center gap-3">
       <div id="user-stats-bar" class="d-none d-md-flex align-items-center gap-2">
         <span class="badge-streak" id="streak-counter-pill" title="Daily preparation streak">
-          <i class="fa-solid fa-fire text-warning"></i> <span id="streak-days-val">1</span> Day Streak
+          <i class="fa-solid fa-fire text-warning"></i> <span id="streak-days-val">5</span> Day Streak
         </span>
         <span class="badge-score" id="score-counter-pill" title="Earned preparation points">
-          <i class="fa-solid fa-gem text-info"></i> <span id="user-score-val">0</span> pts
+          <i class="fa-solid fa-gem text-info"></i> <span id="user-score-val">180</span> pts
         </span>
       </div>
 
-      <div id="auth-state-container">
-        <!-- Replaced dynamically by app.js: Login Button or User Avatar Dropdown -->
-        <button class="btn-primary-custom" id="btn-open-auth" data-bs-toggle="modal" data-bs-target="#authModal">
-          <i class="fa-solid fa-arrow-right-to-bracket"></i> Login / Register
+      <div id="auth-state-container" class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-outline-custom" id="btn-open-login" data-bs-toggle="modal" data-bs-target="#authModal" data-auth-tab="login">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In
+        </button>
+        <button class="btn-primary-custom btn-sm py-2 px-3" id="btn-open-register" data-bs-toggle="modal" data-bs-target="#authModal" data-auth-tab="register">
+          <i class="fa-solid fa-user-plus"></i> Register
         </button>
       </div>
     </div>
@@ -86,12 +88,101 @@
 
     <!-- ==================== VIEW 1: DASHBOARD ==================== -->
     <section id="view-dashboard" class="app-view">
-      <!-- Welcome Banner -->
-      <div class="glass-panel p-4 mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+
+      <!-- Unauthenticated Hero & Direct Login / Register Card (Visible when not logged in) -->
+      <div id="dash-auth-hero" class="glass-panel auth-hero-card p-4 p-md-5 mb-4">
+        <div class="row align-items-center g-4">
+          <div class="col-12 col-lg-7">
+            <span class="badge bg-indigo-soft text-primary px-3 py-1 rounded-pill mb-2" style="background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4);">
+              🚀 AI-Powered Placement Preparation Intelligence
+            </span>
+            <h1 class="display-6 fw-bold mb-3 text-light">Crack Top Tech Campus Placements</h1>
+            <p class="text-secondary lead fs-6 mb-4">
+              Comprehensive placement ecosystem featuring instant ATS resume score, company-specific mock interviews, coding arena curated for 8 major tech giants, and adaptive AI roadmaps.
+            </p>
+            <div class="row g-2 text-light small mb-3">
+              <div class="col-6 col-sm-3 d-flex align-items-center gap-2">
+                <i class="fa-solid fa-circle-check text-success"></i> <span>Google & Amazon</span>
+              </div>
+              <div class="col-6 col-sm-3 d-flex align-items-center gap-2">
+                <i class="fa-solid fa-circle-check text-success"></i> <span>ATS Resume Score</span>
+              </div>
+              <div class="col-6 col-sm-3 d-flex align-items-center gap-2">
+                <i class="fa-solid fa-circle-check text-success"></i> <span>Python Sandbox</span>
+              </div>
+              <div class="col-6 col-sm-3 d-flex align-items-center gap-2">
+                <i class="fa-solid fa-circle-check text-success"></i> <span>24/7 AI Mentor</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-lg-5">
+            <!-- Embedded Login / Register Card on Dashboard -->
+            <div class="glass-panel p-4" style="background: rgba(15, 23, 42, 0.92); border: 1px solid rgba(255, 255, 255, 0.12);">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex gap-1" id="dash-auth-tabs">
+                  <button type="button" class="auth-tab-btn active" id="hero-tab-login">Sign In</button>
+                  <button type="button" class="auth-tab-btn" id="hero-tab-register">Create Account</button>
+                </div>
+                <span class="text-muted small">⚡ Instant Access</span>
+              </div>
+
+              <!-- Inline Login Form -->
+              <form id="hero-form-login">
+                <div class="mb-3">
+                  <label class="form-label-custom">Email Address</label>
+                  <input type="email" id="hero-login-email" class="form-control form-control-custom" placeholder="name@example.com" value="student@preppilot.com" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label-custom">Password</label>
+                  <input type="password" id="hero-login-password" class="form-control form-control-custom" placeholder="••••••••" value="Student#2026" required>
+                </div>
+                <button type="submit" class="btn-primary-custom w-100 justify-content-center mb-3" id="hero-btn-submit-login">
+                  <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In to PrepPilot AI
+                </button>
+              </form>
+
+              <!-- Inline Register Form -->
+              <form id="hero-form-register" class="d-none">
+                <div class="mb-2">
+                  <label class="form-label-custom">Full Name</label>
+                  <input type="text" id="hero-reg-name" class="form-control form-control-custom" placeholder="Priya Sharma" required>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label-custom">Email Address</label>
+                  <input type="email" id="hero-reg-email" class="form-control form-control-custom" placeholder="priya@campus.edu" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label-custom">Create Password</label>
+                  <input type="password" id="hero-reg-password" class="form-control form-control-custom" placeholder="Min 8 chars" required>
+                </div>
+                <button type="submit" class="btn-primary-custom w-100 justify-content-center mb-3" id="hero-btn-submit-register">
+                  <i class="fa-solid fa-user-plus"></i> Create Free Account
+                </button>
+              </form>
+
+              <!-- Quick 1-Click Demo Buttons -->
+              <div class="pt-3 border-top border-secondary border-opacity-25 text-center">
+                <span class="text-muted small d-block mb-2">⚡ 1-Click Instant Demo Login:</span>
+                <div class="d-flex gap-2 justify-content-center">
+                  <button type="button" class="btn btn-sm btn-outline-info" id="hero-quick-student-login">
+                    <i class="fa-solid fa-user-graduate"></i> Demo Student
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-warning" id="hero-quick-admin-login">
+                    <i class="fa-solid fa-user-shield"></i> Demo Admin
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Welcome Banner (Visible when logged in) -->
+      <div id="dash-logged-in-banner" class="glass-panel p-4 mb-4 d-none flex-column flex-md-row justify-content-between align-items-md-center gap-3">
         <div>
           <div class="d-flex align-items-center gap-2 mb-1">
             <span class="badge bg-indigo-soft text-primary px-2 py-1 rounded-pill" style="background: rgba(99, 102, 241, 0.15);">
-              🚀 AI Placement Intelligence
+              🚀 Active Candidate Profile
             </span>
             <span class="text-secondary small" id="current-date-display">Today</span>
           </div>
@@ -100,10 +191,10 @@
         </div>
         <div class="d-flex gap-2">
           <button class="btn-outline-custom" id="btn-quick-plan" data-view="planner">
-            <i class="fa-solid fa-wand-magic-sparkles text-primary"></i> Generate Plan
+            <i class="fa-solid fa-wand-magic-sparkles text-primary"></i> Study Roadmap
           </button>
           <button class="btn-primary-custom" id="btn-quick-interview" data-view="interview">
-            <i class="fa-solid fa-play"></i> Start Mock Interview
+            <i class="fa-solid fa-play"></i> Mock Interview
           </button>
         </div>
       </div>
@@ -127,14 +218,14 @@
                 </defs>
                 <circle class="gauge-bg" cx="95" cy="95" r="75"></circle>
                 <circle class="gauge-fill" id="readiness-gauge-circle" cx="95" cy="95" r="75"
-                  stroke-dasharray="471.2" stroke-dashoffset="188.48"></circle>
+                  stroke-dasharray="471.2" stroke-dashoffset="132"></circle>
               </svg>
               <div class="gauge-text">
-                <div class="gauge-percentage" id="dash-readiness-val">68%</div>
+                <div class="gauge-percentage" id="dash-readiness-val">72%</div>
                 <div class="gauge-subtext">Placement Ready</div>
               </div>
             </div>
-            <p class="text-secondary small mt-2 mb-0" id="dash-readiness-tip">Good foundation! Practice 2 more hard DSA questions.</p>
+            <p class="text-secondary small mt-2 mb-0" id="dash-readiness-tip">Strong technical foundation! Solved questions across 8 target companies.</p>
           </div>
         </div>
 
@@ -154,7 +245,7 @@
               </button>
             </div>
             <div class="mt-3 pt-3 border-top border-secondary border-opacity-25 small text-secondary">
-              <i class="fa-solid fa-circle-check text-success me-1"></i> Python, SQL, REST APIs detected
+              <i class="fa-solid fa-circle-check text-success me-1"></i> Python, SQL, Cloud keywords detected
             </div>
           </div>
         </div>
@@ -167,13 +258,13 @@
                 <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">
                   <i class="fa-solid fa-headset"></i>
                 </div>
-                <div class="stat-value" id="dash-interview-score">76<span class="fs-6 text-muted">%</span></div>
+                <div class="stat-value" id="dash-interview-score">78<span class="fs-6 text-muted">%</span></div>
                 <div class="stat-label">Mock Interview Average</div>
               </div>
               <span class="badge bg-warning bg-opacity-25 text-warning" id="dash-interview-count">3 Sessions</span>
             </div>
             <div class="mt-3 pt-3 border-top border-secondary border-opacity-25 small text-secondary">
-              <i class="fa-solid fa-bullseye text-warning me-1"></i> Strong STAR format, improve tech depth
+              <i class="fa-solid fa-bullseye text-warning me-1"></i> Google & Amazon format evaluated
             </div>
           </div>
         </div>
@@ -186,8 +277,8 @@
                 <div class="stat-icon" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">
                   <i class="fa-solid fa-code"></i>
                 </div>
-                <div class="stat-value" id="dash-problems-solved">14<span class="fs-6 text-muted">/50</span></div>
-                <div class="stat-label">Coding Arena Solved</div>
+                <div class="stat-value" id="dash-problems-solved">14<span class="fs-6 text-muted">/26</span></div>
+                <div class="stat-label">Company Questions Solved</div>
               </div>
               <button class="btn btn-sm btn-outline-secondary" id="dash-btn-solve-coding" data-view="coding">
                 Practice <i class="fa-solid fa-arrow-right"></i>
@@ -221,35 +312,6 @@
             <h5 class="fw-bold mb-3"><i class="fa-solid fa-wand-magic-sparkles text-secondary me-2"></i> AI Action Recommendations</h5>
             <div class="d-flex flex-column gap-3 flex-grow-1" id="dash-recommendations-list">
               <!-- Cards rendered dynamically -->
-              <div class="p-3 rounded border border-secondary border-opacity-25 bg-dark bg-opacity-50">
-                <div class="d-flex justify-content-between">
-                  <span class="badge bg-danger bg-opacity-25 text-danger mb-1">High Priority</span>
-                  <span class="text-muted small">Coding</span>
-                </div>
-                <div class="fw-bold text-light mb-1">Master Dynamic Programming (0/1 Knapsack)</div>
-                <p class="text-secondary small mb-2">High probability topic for Amazon & Microsoft upcoming campus drive.</p>
-                <button class="btn btn-sm btn-outline-custom" data-view="coding">Solve Practice Problem</button>
-              </div>
-
-              <div class="p-3 rounded border border-secondary border-opacity-25 bg-dark bg-opacity-50">
-                <div class="d-flex justify-content-between">
-                  <span class="badge bg-warning bg-opacity-25 text-warning mb-1">Medium Priority</span>
-                  <span class="text-muted small">Resume ATS</span>
-                </div>
-                <div class="fw-bold text-light mb-1">Add System Design & Docker to Resume</div>
-                <p class="text-secondary small mb-2">Your target companies look for containerization and microservice keywords.</p>
-                <button class="btn btn-sm btn-outline-custom" data-view="resume">Upload Updated Resume</button>
-              </div>
-
-              <div class="p-3 rounded border border-secondary border-opacity-25 bg-dark bg-opacity-50">
-                <div class="d-flex justify-content-between">
-                  <span class="badge bg-info bg-opacity-25 text-info mb-1">Suggested</span>
-                  <span class="text-muted small">Mock Interview</span>
-                </div>
-                <div class="fw-bold text-light mb-1">Google Behavioral & Googleyness Round</div>
-                <p class="text-secondary small mb-2">Practice leadership answers with our AI interviewer simulator.</p>
-                <button class="btn btn-sm btn-outline-custom" data-view="interview">Start Google Round</button>
-              </div>
             </div>
           </div>
         </div>
@@ -262,7 +324,7 @@
         <div class="col-12 col-lg-5">
           <div class="glass-panel p-4">
             <h4 class="fw-bold mb-2"><i class="fa-solid fa-file-invoice text-primary me-2"></i> AI Resume Analyzer</h4>
-            <p class="text-secondary small mb-4">Upload your PDF or DOCX resume to get an instant ATS compatibility score, missing skill extraction, and actionable improvements.</p>
+            <p class="text-secondary small mb-4">Upload your PDF or DOCX resume to get an instant ATS compatibility score, missing skill extraction, and actionable improvements for tech roles.</p>
             
             <form id="resume-upload-form" class="mb-4">
               <div class="p-4 border border-dashed rounded text-center mb-3" style="border-color: rgba(99, 102, 241, 0.4) !important; background: rgba(99, 102, 241, 0.03);">
@@ -284,7 +346,6 @@
               <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-clock-rotate-left me-1"></i> Analysis History</h6>
               <div id="resume-history-list" class="d-flex flex-column gap-2 small">
                 <!-- Dynamically populated -->
-                <div class="text-muted">No previous resumes evaluated.</div>
               </div>
             </div>
           </div>
@@ -313,25 +374,19 @@
               <!-- Detected Skills -->
               <div class="mb-4">
                 <h6 class="fw-bold mb-2"><i class="fa-solid fa-check-double text-success me-2"></i> Identified Skills</h6>
-                <div id="report-extracted-skills" class="d-flex flex-wrap">
-                  <!-- Skill chips -->
-                </div>
+                <div id="report-extracted-skills" class="d-flex flex-wrap"></div>
               </div>
 
               <!-- Missing Key Skills -->
               <div class="mb-4">
                 <h6 class="fw-bold mb-2"><i class="fa-solid fa-triangle-exclamation text-danger me-2"></i> Missing Industry Keywords</h6>
-                <div id="report-missing-skills" class="d-flex flex-wrap">
-                  <!-- Missing chips -->
-                </div>
+                <div id="report-missing-skills" class="d-flex flex-wrap"></div>
               </div>
 
               <!-- Actionable Suggestions -->
               <div class="mb-3">
                 <h6 class="fw-bold mb-2"><i class="fa-solid fa-lightbulb text-warning me-2"></i> Actionable Suggestions</h6>
-                <ul id="report-suggestions-list" class="list-unstyled d-flex flex-column gap-2 text-light small">
-                  <!-- Suggestions -->
-                </ul>
+                <ul id="report-suggestions-list" class="list-unstyled d-flex flex-column gap-2 text-light small"></ul>
               </div>
             </div>
           </div>
@@ -344,7 +399,7 @@
       <div id="interview-select-screen">
         <div class="glass-panel p-4 mb-4">
           <h4 class="fw-bold mb-1"><i class="fa-solid fa-microphone-lines text-primary me-2"></i> Company-Specific AI Mock Interviews</h4>
-          <p class="text-secondary small mb-0">Select your target dream company. Gemini AI will simulate the actual interview style, ask technical & behavioral questions, and grade your answers according to the STAR method.</p>
+          <p class="text-secondary small mb-0">Select your target dream company. Gemini AI simulates the exact interview round, asks technical & behavioral questions, and grades your answers with the STAR method rubric.</p>
         </div>
 
         <div class="row g-3" id="company-cards-grid">
@@ -374,9 +429,7 @@
         <div class="row g-3">
           <div class="col-12 col-lg-8">
             <div class="glass-panel p-3 d-flex flex-column" style="height: 540px;">
-              <div class="chat-container flex-grow-1" id="interview-chat-log">
-                <!-- Messages -->
-              </div>
+              <div class="chat-container flex-grow-1" id="interview-chat-log"></div>
               <div class="pt-3 border-top border-secondary border-opacity-25">
                 <div class="input-group">
                   <textarea id="interview-answer-input" class="form-control form-control-custom" rows="2" placeholder="Type your structured answer (Use STAR method: Situation, Task, Action, Result)..."></textarea>
@@ -405,13 +458,32 @@
       <div class="row g-3">
         <!-- Question List Sidebar -->
         <div class="col-12 col-lg-4">
-          <div class="glass-panel p-3" style="height: 640px; display: flex; flex-direction: column;">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h5 class="fw-bold mb-0"><i class="fa-solid fa-code text-primary me-2"></i> Problem Bank</h5>
+          <div class="glass-panel p-3" style="height: 680px; display: flex; flex-direction: column;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="fw-bold mb-0"><i class="fa-solid fa-code text-primary me-2"></i> Company Problem Bank</h5>
               <span class="badge bg-secondary" id="coding-question-count">0 Problems</span>
             </div>
 
-            <!-- Filters -->
+            <!-- Company Track Selector Pills -->
+            <div class="mb-3">
+              <label class="form-label-custom d-flex justify-content-between">
+                <span><i class="fa-solid fa-building text-info me-1"></i> Filter by Target Company</span>
+                <span class="text-primary small" id="current-company-filter-label">All</span>
+              </label>
+              <div class="company-filter-bar" id="coding-company-pills">
+                <button type="button" class="company-pill active" data-company="all"><i class="fa-solid fa-globe"></i> All</button>
+                <button type="button" class="company-pill" data-company="Google"><i class="fa-brands fa-google text-danger"></i> Google</button>
+                <button type="button" class="company-pill" data-company="Amazon"><i class="fa-brands fa-amazon text-warning"></i> Amazon</button>
+                <button type="button" class="company-pill" data-company="Microsoft"><i class="fa-brands fa-microsoft text-info"></i> Microsoft</button>
+                <button type="button" class="company-pill" data-company="Goldman Sachs"><i class="fa-solid fa-coins text-warning"></i> Goldman</button>
+                <button type="button" class="company-pill" data-company="Deloitte"><i class="fa-solid fa-chart-line text-success"></i> Deloitte</button>
+                <button type="button" class="company-pill" data-company="Accenture"><i class="fa-solid fa-network-wired text-primary"></i> Accenture</button>
+                <button type="button" class="company-pill" data-company="TCS"><i class="fa-solid fa-laptop-code text-info"></i> TCS</button>
+                <button type="button" class="company-pill" data-company="Infosys"><i class="fa-solid fa-briefcase text-secondary"></i> Infosys</button>
+              </div>
+            </div>
+
+            <!-- Difficulty & Category Filters -->
             <div class="d-flex gap-2 mb-3">
               <select id="coding-filter-difficulty" class="form-select form-control-custom form-select-sm">
                 <option value="">All Difficulties</option>
@@ -421,16 +493,19 @@
               </select>
               <select id="coding-filter-category" class="form-select form-control-custom form-select-sm">
                 <option value="">All Categories</option>
-                <option value="Array">Arrays</option>
-                <option value="String">Strings</option>
+                <option value="Arrays">Arrays</option>
+                <option value="Strings">Strings</option>
                 <option value="Dynamic Programming">Dynamic Programming</option>
-                <option value="Tree">Trees / Graphs</option>
+                <option value="Searching">Searching</option>
+                <option value="Graphs">Graphs</option>
+                <option value="Stacks">Stacks</option>
+                <option value="Math">Math</option>
               </select>
             </div>
 
             <!-- Question Scroll List -->
             <div class="flex-grow-1 overflow-y-auto d-flex flex-column gap-2" id="coding-questions-list">
-              <!-- Dynamically populated -->
+              <!-- Dynamically populated with company badges -->
             </div>
           </div>
         </div>
@@ -441,7 +516,8 @@
             <!-- Problem Header -->
             <div class="d-flex justify-content-between align-items-start mb-2 pb-2 border-bottom border-secondary border-opacity-25">
               <div>
-                <div class="d-flex align-items-center gap-2 mb-1">
+                <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                  <span class="badge-company badge-company-google" id="problem-company-badge">Google</span>
                   <span class="badge-diff-medium" id="problem-difficulty-badge">Medium</span>
                   <span class="text-muted small" id="problem-category-badge">Arrays</span>
                 </div>
@@ -497,12 +573,12 @@
         <div class="col-12 col-lg-4">
           <div class="glass-panel p-4">
             <h4 class="fw-bold mb-2"><i class="fa-solid fa-calendar-check text-primary me-2"></i> AI Study Roadmap</h4>
-            <p class="text-secondary small mb-4">Generate an intelligent day-by-day placement study schedule adapted to your weak areas and target companies.</p>
+            <p class="text-secondary small mb-4">Generate an intelligent day-by-day placement study schedule adapted to your target companies and weak areas.</p>
 
             <form id="plan-generator-form">
               <div class="mb-3">
                 <label class="form-label-custom">Preparation Focus & Weak Areas</label>
-                <textarea id="plan-preferences-input" class="form-control form-control-custom" rows="3" placeholder="e.g. Weak at Dynamic Programming and Graphs. Target company: Amazon and TCS Digital. Need 7-day intensive prep."></textarea>
+                <textarea id="plan-preferences-input" class="form-control form-control-custom" rows="3" placeholder="e.g. Weak at Dynamic Programming and Graphs. Target companies: Amazon, Google, and TCS Digital. Need 7-day intensive prep."></textarea>
               </div>
               <button type="submit" class="btn-primary-custom w-100 justify-content-center" id="btn-generate-plan">
                 <i class="fa-solid fa-wand-magic-sparkles"></i> Generate AI Placement Roadmap
@@ -511,9 +587,7 @@
 
             <div class="mt-4 pt-3 border-top border-secondary border-opacity-25">
               <h6 class="fw-bold text-secondary mb-3">Previous Study Plans</h6>
-              <div id="planner-saved-plans-list" class="d-flex flex-column gap-2 small">
-                <!-- Dynamically populated -->
-              </div>
+              <div id="planner-saved-plans-list" class="d-flex flex-column gap-2 small"></div>
             </div>
           </div>
         </div>
@@ -526,18 +600,12 @@
                 <h5 class="fw-bold mb-0" id="active-plan-title">7-Day Placement Sprint</h5>
               </div>
               <div class="text-end">
-                <span class="badge bg-info bg-opacity-25 text-info" id="active-plan-progress">0% Completed</span>
+                <span class="badge bg-info bg-opacity-25 text-info" id="active-plan-progress">57% Completed</span>
               </div>
             </div>
 
             <!-- Task Checklist -->
-            <div id="planner-tasks-container" class="d-flex flex-column gap-2">
-              <!-- Dynamically populated tasks -->
-              <div class="text-center py-5 text-muted">
-                <i class="fa-solid fa-calendar-plus fs-2 mb-2"></i>
-                <p>Click "Generate AI Placement Roadmap" to create your structured daily plan.</p>
-              </div>
-            </div>
+            <div id="planner-tasks-container" class="d-flex flex-column gap-2"></div>
           </div>
         </div>
       </div>
@@ -574,14 +642,14 @@
             <!-- Chat Messages Log -->
             <div class="chat-container flex-grow-1" id="mentor-chat-log">
               <div class="chat-bubble bubble-ai">
-                👋 Hello! I am your 24/7 AI Placement Mentor. Ask me anything about preparing for campus placements, technical interviews at Google/Amazon, salary benchmarks, or how to phrase bullets on your resume!
+                👋 Hello! I am your 24/7 AI Placement Mentor. Ask me anything about preparing for campus placements, technical interviews at Google/Amazon/Microsoft, salary negotiation, or phrasing impactful bullets on your resume!
               </div>
             </div>
 
             <!-- Quick Suggestions -->
             <div class="d-flex gap-2 overflow-x-auto py-2 mb-2" id="chat-quick-suggestions">
               <button class="btn btn-sm btn-outline-custom text-nowrap quick-prompt-btn" data-prompt="What are the top DSA patterns asked by Google and Microsoft?">Top DSA patterns?</button>
-              <button class="btn btn-sm btn-outline-custom text-nowrap quick-prompt-btn" data-prompt="How do I answer 'Tell me about a time you had a conflict with a team member'?">HR conflict question</button>
+              <button class="btn btn-sm btn-outline-custom text-nowrap quick-prompt-btn" data-prompt="How do I answer 'Tell me about a time you had a conflict with a team member' using STAR?">HR conflict question</button>
               <button class="btn btn-sm btn-outline-custom text-nowrap quick-prompt-btn" data-prompt="How should I optimize my resume bullet points with metrics?">Resume metrics phrasing</button>
               <button class="btn btn-sm btn-outline-custom text-nowrap quick-prompt-btn" data-prompt="Explain Dynamic Programming vs Recursion with Memoization">DP vs Memoization</button>
             </div>
@@ -633,9 +701,7 @@
         <p class="text-secondary small mb-0">Platform overview, user management, curate companies, and coding questions.</p>
       </div>
 
-      <div class="row g-3 mb-4" id="admin-stats-row">
-        <!-- Admin metric cards -->
-      </div>
+      <div class="row g-3 mb-4" id="admin-stats-row"></div>
 
       <div class="row g-3">
         <div class="col-12 col-lg-6">
@@ -651,9 +717,7 @@
                     <th>Score</th>
                   </tr>
                 </thead>
-                <tbody id="admin-users-table">
-                  <!-- Users -->
-                </tbody>
+                <tbody id="admin-users-table"></tbody>
               </table>
             </div>
           </div>
@@ -673,9 +737,7 @@
                     <th>Difficulty</th>
                   </tr>
                 </thead>
-                <tbody id="admin-companies-table">
-                  <!-- Companies -->
-                </tbody>
+                <tbody id="admin-companies-table"></tbody>
               </table>
             </div>
           </div>
@@ -690,7 +752,7 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content modal-content-glass p-3">
         <div class="modal-header border-0 pb-0">
-          <h5 class="modal-title fw-bold" id="authModalTitle">Sign in to PrepPilot AI</h5>
+          <h5 class="modal-title fw-bold" id="authModalTitle">Sign In / Register</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -708,11 +770,11 @@
           <form id="form-login">
             <div class="mb-3">
               <label class="form-label-custom">Email Address</label>
-              <input type="email" id="login-email" class="form-control form-control-custom" placeholder="name@example.com" required>
+              <input type="email" id="login-email" class="form-control form-control-custom" placeholder="name@example.com" value="student@preppilot.com" required>
             </div>
             <div class="mb-3">
               <label class="form-label-custom">Password</label>
-              <input type="password" id="login-password" class="form-control form-control-custom" placeholder="••••••••" required>
+              <input type="password" id="login-password" class="form-control form-control-custom" placeholder="••••••••" value="Student#2026" required>
             </div>
             <button type="submit" class="btn-primary-custom w-100 justify-content-center mb-3" id="btn-submit-login">
               Sign In
@@ -742,6 +804,9 @@
           <div class="pt-3 border-top border-secondary border-opacity-25 text-center">
             <span class="text-muted small d-block mb-2">⚡ 1-Click Quick Testing:</span>
             <div class="d-flex gap-2 justify-content-center">
+              <button type="button" class="btn btn-sm btn-outline-info" id="btn-quick-student-login">
+                <i class="fa-solid fa-user-graduate"></i> Demo Student
+              </button>
               <button type="button" class="btn btn-sm btn-outline-warning" id="btn-quick-admin-login">
                 <i class="fa-solid fa-user-shield"></i> Demo Admin
               </button>

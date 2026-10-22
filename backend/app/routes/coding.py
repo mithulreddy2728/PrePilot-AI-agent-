@@ -14,7 +14,7 @@ from ..database import get_db
 from ..models.user import User
 from ..models.coding import CodingQuestion, Submission, Bookmark
 from ..models.activity import UserActivity
-from ..utils.dependencies import get_current_user
+from ..utils.dependencies import get_current_user, get_optional_current_user
 
 router = APIRouter(prefix="/api/coding", tags=["Coding"])
 
@@ -32,35 +32,40 @@ class BookmarkRequest(BaseModel):
 def list_questions(
     difficulty: str = Query(None),
     category: str = Query(None),
+    company: str = Query(None),
     page: int = Query(1, ge=1),
-    limit: int = Query(20, ge=1, le=100),
-    current_user: User = Depends(get_current_user),
+    limit: int = Query(50, ge=1, le=100),
+    current_user: User | None = Depends(get_optional_current_user),
     db: Session = Depends(get_db),
 ):
-    """List coding questions with optional filtering."""
+    """List coding questions with optional filtering by difficulty, category, and company."""
     query = db.query(CodingQuestion)
     if difficulty:
         query = query.filter(CodingQuestion.difficulty == difficulty)
     if category:
         query = query.filter(CodingQuestion.category == category)
+    if company and company.lower() != "all":
+        query = query.filter(CodingQuestion.company.ilike(f"%{company}%"))
 
     total = query.count()
     questions = query.offset((page - 1) * limit).limit(limit).all()
 
-    # Get user's submission status for each question
-    submitted_ids = set(
-        r[0]
-        for r in db.query(Submission.question_id)
-        .filter(Submission.user_id == current_user.id, Submission.status == "passed")
-        .all()
-    )
-
-    bookmarked_ids = set(
-        r[0]
-        for r in db.query(Bookmark.question_id)
-        .filter(Bookmark.user_id == current_user.id)
-        .all()
-    )
+    # Get user's submission status for each question if logged in
+    submitted_ids = set()
+    bookmarked_ids = set()
+    if current_user:
+        submitted_ids = set(
+            r[0]
+            for r in db.query(Submission.question_id)
+            .filter(Submission.user_id == current_user.id, Submission.status == "passed")
+            .all()
+        )
+        bookmarked_ids = set(
+            r[0]
+            for r in db.query(Bookmark.question_id)
+            .filter(Bookmark.user_id == current_user.id)
+            .all()
+        )
 
     return {
         "total": total,
@@ -71,6 +76,7 @@ def list_questions(
                 "title": q.title,
                 "difficulty": q.difficulty,
                 "category": q.category,
+                "company": getattr(q, "company", "General") or "General",
                 "acceptance_rate": q.acceptance_rate,
                 "solved": q.id in submitted_ids,
                 "bookmarked": q.id in bookmarked_ids,
@@ -83,7 +89,7 @@ def list_questions(
 @router.get("/questions/{question_id}")
 def get_question(
     question_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_optional_current_user),
     db: Session = Depends(get_db),
 ):
     """Get a specific coding question with details."""
@@ -97,6 +103,7 @@ def get_question(
         "description": q.description,
         "difficulty": q.difficulty,
         "category": q.category,
+        "company": getattr(q, "company", "General") or "General",
         "constraints": q.constraints,
         "examples": json.loads(q.examples) if q.examples else [],
         "starter_code": q.starter_code,

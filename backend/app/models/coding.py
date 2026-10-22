@@ -14,6 +14,7 @@ class CodingQuestion(Base):
     description = Column(Text, nullable=False)
     difficulty = Column(String(20), default="easy")  # easy, medium, hard
     category = Column(String(100), default="general")
+    company = Column(String(100), default="General", index=True)
     test_cases = Column(Text, default="[]")  # JSON array
     solution = Column(Text, default="")
     constraints = Column(Text, default="")

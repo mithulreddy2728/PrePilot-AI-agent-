@@ -14,17 +14,37 @@ from ..models.coding import Submission, CodingQuestion
 from ..models.planner import StudyPlan, StudyTask
 from ..models.chat import ChatSession
 from ..models.activity import UserActivity
-from ..utils.dependencies import get_current_user
+from ..utils.dependencies import get_current_user, get_optional_current_user
 
 router = APIRouter(prefix="/api/dashboard", tags=["Dashboard"])
 
 
 @router.get("/stats")
 def get_dashboard_stats(
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_optional_current_user),
     db: Session = Depends(get_db),
 ):
-    """Get comprehensive dashboard statistics."""
+    """Get comprehensive dashboard statistics (supports preview mode for unauthenticated visitors)."""
+    total_questions = db.query(CodingQuestion).count()
+    if not current_user:
+        return {
+            "is_preview": True,
+            "readiness_score": 72.0,
+            "ats_score": 82,
+            "interview_count": 3,
+            "avg_interview_score": 78.5,
+            "coding_solved": 14,
+            "unique_solved": 14,
+            "total_questions": total_questions or 35,
+            "streak_days": 5,
+            "total_score": 180,
+            "resume": {"count": 1, "latest_score": 82, "rating": "Strong Fit"},
+            "interviews": {"count": 3, "avg_score": 78.5, "completed": 3},
+            "coding": {"submissions": 20, "passed": 14, "unique_solved": 14, "total_questions": total_questions or 35},
+            "study": {"active_plans": 1, "total_tasks": 7, "completed_tasks": 4, "progress": 57},
+            "chats": 2,
+        }
+
     uid = current_user.id
 
     # Resume stats
@@ -128,12 +148,22 @@ def get_dashboard_stats(
 
 @router.get("/heatmap")
 def get_activity_heatmap(
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_optional_current_user),
     db: Session = Depends(get_db),
 ):
     """Get activity heatmap data for the last 365 days."""
     end_date = date.today()
     start_date = end_date - timedelta(days=365)
+
+    if not current_user:
+        # Preview heatmap
+        return {
+            "heatmap": {
+                (end_date - timedelta(days=i)).isoformat(): (i % 4) for i in range(14)
+            },
+            "start_date": start_date.isoformat(),
+            "end_date": end_date.isoformat(),
+        }
 
     activities = (
         db.query(UserActivity)
@@ -145,7 +175,6 @@ def get_activity_heatmap(
         .all()
     )
 
-    # Count activities per date
     heatmap = defaultdict(int)
     for a in activities:
         key = a.date.isoformat() if a.date else ""
@@ -160,10 +189,29 @@ def get_activity_heatmap(
 
 @router.get("/charts")
 def get_chart_data(
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_optional_current_user),
     db: Session = Depends(get_db),
 ):
     """Get data for Chart.js visualizations."""
+    if not current_user:
+        return {
+            "daily_submissions": [{"date": (date.today() - timedelta(days=i)).isoformat(), "count": 2 + (i % 3)} for i in range(6, -1, -1)],
+            "difficulty_distribution": {"easy": 8, "medium": 5, "hard": 1},
+            "interview_scores": [
+                {"date": (date.today() - timedelta(days=3)).isoformat(), "score": 75},
+                {"date": (date.today() - timedelta(days=2)).isoformat(), "score": 82},
+                {"date": (date.today() - timedelta(days=1)).isoformat(), "score": 85},
+            ],
+            "categories": [
+                {"name": "DSA & Algorithms", "score": 78},
+                {"name": "System Design", "score": 65},
+                {"name": "Core CS (OS/DBMS)", "score": 82},
+                {"name": "Behavioral (STAR)", "score": 75},
+                {"name": "Problem Solving Speed", "score": 70},
+            ],
+            "task_categories": {"DSA": 4, "System Design": 2, "HR": 1},
+        }
+
     uid = current_user.id
 
     # Submissions per day (last 7 days)
@@ -218,16 +266,53 @@ def get_chart_data(
             {"date": s.ended_at.isoformat() if s.ended_at else "", "score": s.score}
             for s in interview_scores
         ],
+        "categories": [
+            {"name": "DSA & Algorithms", "score": 78},
+            {"name": "System Design", "score": 65},
+            {"name": "Core CS (OS/DBMS)", "score": 82},
+            {"name": "Behavioral (STAR)", "score": 75},
+            {"name": "Problem Solving Speed", "score": 70},
+        ],
         "task_categories": {cat: count for cat, count in task_categories},
     }
 
 
 @router.get("/recommendations")
 def get_recommendations(
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_optional_current_user),
     db: Session = Depends(get_db),
 ):
     """Get personalized recommendations for the user."""
+    if not current_user:
+        return {
+            "recommendations": [
+                {
+                    "type": "coding",
+                    "priority": "high",
+                    "title": "Master Google & Amazon DSA Track",
+                    "description": "Practice high-frequency interview questions: Two Sum, LRU Cache, and Maximum Subarray.",
+                    "action_view": "coding",
+                    "action_text": "Practice Company Questions",
+                },
+                {
+                    "type": "resume",
+                    "priority": "medium",
+                    "title": "Analyze Resume for ATS Fit",
+                    "description": "Check if your resume passes automated filters for Google, Microsoft, and Deloitte.",
+                    "action_view": "resume",
+                    "action_text": "Upload Resume",
+                },
+                {
+                    "type": "interview",
+                    "priority": "high",
+                    "title": "Simulate Live AI Interview",
+                    "description": "Practice with AI interviewer for Amazon Leadership Principles or Google Problem Solving.",
+                    "action_view": "interview",
+                    "action_text": "Start AI Mock Interview",
+                },
+            ]
+        }
+
     uid = current_user.id
     recommendations = []
 

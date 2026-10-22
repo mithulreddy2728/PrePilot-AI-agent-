@@ -154,10 +154,11 @@ class ApiClient {
   }
 
   // ── Coding Endpoints ──
-  async getCodingQuestions(difficulty = "", category = "") {
+  async getCodingQuestions(difficulty = "", category = "", company = "") {
     let url = "/api/coding/questions?";
     if (difficulty) url += `difficulty=${encodeURIComponent(difficulty)}&`;
     if (category) url += `category=${encodeURIComponent(category)}&`;
+    if (company && company.toLowerCase() !== "all") url += `company=${encodeURIComponent(company)}&`;
     return await this.request(url);
   }
 
