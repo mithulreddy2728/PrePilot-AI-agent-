@@ -729,3 +729,317 @@ body {
   color: #fff;
 }
 
+/* ─────────────────────────────────────────────────────────────
+   ADDITIONAL COMPANY BADGES (16 MAJOR COMPANIES)
+   ───────────────────────────────────────────────────────────── */
+.badge-company-meta {
+  background: rgba(24, 119, 242, 0.15);
+  border: 1px solid rgba(24, 119, 242, 0.4);
+  color: #60a5fa;
+}
+
+.badge-company-apple {
+  background: rgba(226, 232, 240, 0.15);
+  border: 1px solid rgba(226, 232, 240, 0.4);
+  color: #f1f5f9;
+}
+
+.badge-company-netflix {
+  background: rgba(229, 9, 20, 0.15);
+  border: 1px solid rgba(229, 9, 20, 0.4);
+  color: #f87171;
+}
+
+.badge-company-uber {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #e2e8f0;
+}
+
+.badge-company-adobe {
+  background: rgba(250, 68, 55, 0.15);
+  border: 1px solid rgba(250, 68, 55, 0.4);
+  color: #fb7185;
+}
+
+.badge-company-atlassian {
+  background: rgba(0, 82, 204, 0.15);
+  border: 1px solid rgba(0, 82, 204, 0.4);
+  color: #38bdf8;
+}
+
+.badge-company-oracle {
+  background: rgba(248, 0, 0, 0.15);
+  border: 1px solid rgba(248, 0, 0, 0.35);
+  color: #fca5a5;
+}
+
+.badge-company-walmart {
+  background: rgba(0, 113, 206, 0.15);
+  border: 1px solid rgba(0, 113, 206, 0.4);
+  color: #7dd3fc;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   ATTRACTIVE LEADERBOARD & PODIUM STYLES
+   ───────────────────────────────────────────────────────────── */
+.leaderboard-header-banner {
+  background: linear-gradient(135deg, rgba(30, 27, 75, 0.7) 0%, rgba(15, 23, 42, 0.85) 50%, rgba(15, 43, 75, 0.7) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: var(--radius-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.leaderboard-header-banner::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.podium-section {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 1.5rem;
+  margin: 1.5rem 0 2rem 0;
+  flex-wrap: wrap;
+}
+
+.podium-card {
+  border-radius: 16px;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  width: 250px;
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.podium-card:hover {
+  transform: translateY(-8px);
+}
+
+/* 1st Place - Gold Champion */
+.podium-card.rank-1 {
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.15) 0%, rgba(15, 23, 42, 0.9) 100%);
+  border: 2px solid rgba(245, 158, 11, 0.6);
+  box-shadow: 0 0 35px rgba(245, 158, 11, 0.25), 0 10px 25px rgba(0, 0, 0, 0.5);
+  order: 2;
+  margin-top: -20px;
+  z-index: 2;
+}
+
+/* 2nd Place - Silver */
+.podium-card.rank-2 {
+  background: linear-gradient(180deg, rgba(148, 163, 184, 0.15) 0%, rgba(15, 23, 42, 0.9) 100%);
+  border: 2px solid rgba(148, 163, 184, 0.5);
+  box-shadow: 0 0 25px rgba(148, 163, 184, 0.15), 0 10px 20px rgba(0, 0, 0, 0.5);
+  order: 1;
+}
+
+/* 3rd Place - Bronze */
+.podium-card.rank-3 {
+  background: linear-gradient(180deg, rgba(217, 119, 6, 0.15) 0%, rgba(15, 23, 42, 0.9) 100%);
+  border: 2px solid rgba(217, 119, 6, 0.5);
+  box-shadow: 0 0 25px rgba(217, 119, 6, 0.15), 0 10px 20px rgba(0, 0, 0, 0.5);
+  order: 3;
+}
+
+.podium-avatar-wrapper {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 0.75rem auto;
+}
+
+.podium-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #fff;
+  border: 3px solid;
+}
+
+.rank-1 .podium-avatar {
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+  border-color: #fbbf24;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+}
+
+.rank-2 .podium-avatar {
+  background: linear-gradient(135deg, #475569, #94a3b8);
+  border-color: #cbd5e1;
+  box-shadow: 0 0 15px rgba(203, 213, 225, 0.35);
+}
+
+.rank-3 .podium-avatar {
+  background: linear-gradient(135deg, #78350f, #b45309);
+  border-color: #d97706;
+  box-shadow: 0 0 15px rgba(217, 119, 6, 0.35);
+}
+
+.podium-crown {
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.5rem;
+  filter: drop-shadow(0 0 8px #f59e0b);
+  animation: floatCrown 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes floatCrown {
+  0% { transform: translateX(-50%) translateY(0); }
+  100% { transform: translateX(-50%) translateY(-5px); }
+}
+
+.podium-badge {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.rank-1 .podium-badge { background: #f59e0b; color: #000; box-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
+.rank-2 .podium-badge { background: #94a3b8; color: #000; }
+.rank-3 .podium-badge { background: #b45309; color: #fff; }
+
+.podium-score {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #38bdf8;
+  margin-top: 0.35rem;
+}
+
+.rank-1 .podium-score {
+  color: #fbbf24;
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+}
+
+/* TIER BADGES */
+.tier-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.tier-grandmaster {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
+}
+
+.tier-master {
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  color: #c084fc;
+}
+
+.tier-diamond {
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+}
+
+.tier-expert {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34d399;
+}
+
+.tier-rising {
+  background: rgba(148, 163, 184, 0.15);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  color: #94a3b8;
+}
+
+/* Current User Rank Strip */
+.my-rank-banner {
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.2) 0%, rgba(6, 182, 212, 0.15) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+/* CODING PRACTICE MULTI-LANGUAGE SUITE */
+.lang-selector-select {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  color: #f8fafc;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 4px 10px;
+  cursor: pointer;
+  outline: none;
+}
+
+.lang-selector-select:focus {
+  border-color: #818cf8;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+.testcase-tab-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-glass);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.testcase-tab-btn.active {
+  background: rgba(99, 102, 241, 0.25);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.testcase-tab-btn.passed {
+  border-color: rgba(16, 185, 129, 0.5);
+  color: #34d399;
+}
+
+.testcase-tab-btn.failed {
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #f87171;
+}
+
+.company-filter-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+}
+
+

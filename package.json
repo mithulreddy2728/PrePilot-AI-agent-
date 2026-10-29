@@ -1,0 +1,22 @@
+{
+  "name": "preppilot-ai",
+  "version": "1.0.0",
+  "description": "PrepPilot AI - Premium Placement Preparation, Multi-Language DSA Arena & AI Interview Platform",
+  "main": "frontend/index.html",
+  "scripts": {
+    "start": "npx serve frontend",
+    "dev": "npx serve frontend -p 3000",
+    "build": "echo 'Frontend build ready in ./frontend'"
+  },
+  "keywords": [
+    "ai",
+    "placement",
+    "dsa",
+    "coding-arena",
+    "interview-prep",
+    "fastapi",
+    "glassmorphism"
+  ],
+  "author": "Mithilesh Reddy",
+  "license": "MIT"
+}

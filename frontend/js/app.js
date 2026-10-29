@@ -17,7 +17,15 @@ function getCompanyBadgeClass(companyName) {
   if (norm.includes("google")) return "badge-company-google";
   if (norm.includes("amazon")) return "badge-company-amazon";
   if (norm.includes("microsoft")) return "badge-company-microsoft";
+  if (norm.includes("meta") || norm.includes("facebook")) return "badge-company-meta";
+  if (norm.includes("apple")) return "badge-company-apple";
+  if (norm.includes("netflix")) return "badge-company-netflix";
   if (norm.includes("goldman")) return "badge-company-goldman";
+  if (norm.includes("uber")) return "badge-company-uber";
+  if (norm.includes("adobe")) return "badge-company-adobe";
+  if (norm.includes("atlassian")) return "badge-company-atlassian";
+  if (norm.includes("oracle")) return "badge-company-oracle";
+  if (norm.includes("walmart")) return "badge-company-walmart";
   if (norm.includes("deloitte")) return "badge-company-deloitte";
   if (norm.includes("accenture")) return "badge-company-accenture";
   if (norm.includes("tcs")) return "badge-company-tcs";
@@ -538,9 +546,7 @@ function setupResume() {
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!api.isAuthenticated()) {
-      showToast("Please log in to analyze your resume.", "error");
-      document.getElementById("btn-open-login")?.click();
-      return;
+      showToast("Analyzing in Guest Mode. Log in anytime to save this report to your profile.", "info");
     }
 
     if (!fileInput.files.length) {
@@ -588,7 +594,7 @@ function renderResumeReport(report) {
   // Extracted skills
   const skillsContainer = document.getElementById("report-extracted-skills");
   if (skillsContainer) {
-    const skills = report.extracted_skills || ["Python", "FastAPI", "SQL", "Docker", "Git", "Algorithms"];
+    const skills = (report.skills && report.skills.length ? report.skills : report.extracted_skills) || ["Python", "FastAPI", "SQL", "Docker", "Git", "Algorithms"];
     skillsContainer.innerHTML = skills
       .map((s) => `<span class="skill-chip skill-chip-found"><i class="fa-solid fa-check"></i> ${s}</span>`)
       .join("");
@@ -809,8 +815,74 @@ function renderEvaluationFeedback(evalData) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// 6. Coding Practice Arena Module (with Company Track Filtering)
+// 6. Coding Practice Arena Module (Multi-Language LeetCode-style)
 // ─────────────────────────────────────────────────────────────
+const LANGUAGE_BOILERPLATES = {
+  python: `# Python 3 Solution
+import sys
+
+def main():
+    input_data = sys.stdin.read().strip()
+    if not input_data:
+        return
+    # Write your solution logic here
+
+if __name__ == '__main__':
+    main()
+`,
+  javascript: `// JavaScript (Node.js) Solution
+const fs = require('fs');
+
+function main() {
+    const input = fs.readFileSync(0, 'utf-8').trim();
+    if (!input) return;
+    // Write your solution logic here
+}
+
+main();
+`,
+  cpp: `// C++ (g++ 17) Solution
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    // Write your solution logic here
+    return 0;
+}
+`,
+  c: `/* C (gcc 11) Solution */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main() {
+    // Read input and output result
+    return 0;
+}
+`,
+  java: `// Java (OpenJDK) Solution
+import java.util.*;
+import java.io.*;
+
+public class Solution {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        // Write your solution logic here
+    }
+}
+`,
+  php: `<?php
+// PHP Solution
+$input = trim(file_get_contents("php://stdin"));
+// Write your solution logic here
+`,
+};
+
 function setupCoding() {
   // Company pills listener
   const pills = document.querySelectorAll("#coding-company-pills .company-pill");
@@ -829,18 +901,76 @@ function setupCoding() {
   document.getElementById("coding-filter-difficulty")?.addEventListener("change", loadCodingQuestions);
   document.getElementById("coding-filter-category")?.addEventListener("change", loadCodingQuestions);
 
+  // Language selector
+  const langSelect = document.getElementById("code-language-select");
+  if (langSelect) {
+    langSelect.addEventListener("change", () => {
+      const selectedLang = langSelect.value;
+      const editor = document.getElementById("code-editor");
+      if (editor) {
+        if (selectedLang === "python" && currentCodingQuestion?.starter_code) {
+          editor.value = currentCodingQuestion.starter_code;
+        } else {
+          editor.value = LANGUAGE_BOILERPLATES[selectedLang] || "";
+        }
+      }
+      showToast(`Switched editor to ${langSelect.options[langSelect.selectedIndex].text}`, "info");
+    });
+  }
+
+  // Reset code button
+  document.getElementById("btn-reset-code")?.addEventListener("click", () => {
+    const lang = document.getElementById("code-language-select")?.value || "python";
+    const editor = document.getElementById("code-editor");
+    if (editor) {
+      if (lang === "python" && currentCodingQuestion?.starter_code) {
+        editor.value = currentCodingQuestion.starter_code;
+      } else {
+        editor.value = LANGUAGE_BOILERPLATES[lang] || "";
+      }
+      showToast("Starter code reset", "info");
+    }
+  });
+
+  // Tab key indentation support for code editor
+  const codeEditor = document.getElementById("code-editor");
+  if (codeEditor) {
+    codeEditor.addEventListener("keydown", (e) => {
+      if (e.key === "Tab") {
+        e.preventDefault();
+        const start = codeEditor.selectionStart;
+        const end = codeEditor.selectionEnd;
+        codeEditor.value = codeEditor.value.substring(0, start) + "    " + codeEditor.value.substring(end);
+        codeEditor.selectionStart = codeEditor.selectionEnd = start + 4;
+      }
+    });
+  }
+
   // Run Code
   document.getElementById("btn-run-code")?.addEventListener("click", async () => {
     const code = document.getElementById("code-editor").value;
+    const lang = document.getElementById("code-language-select")?.value || "python";
     const outputConsole = document.getElementById("code-console-output");
-    outputConsole.innerHTML = '<span class="text-info"><i class="fa-solid fa-spinner fa-spin"></i> Running in Python sandbox...</span>';
+    outputConsole.innerHTML = `<span class="text-info"><i class="fa-solid fa-spinner fa-spin"></i> Executing in ${lang.toUpperCase()} sandbox...</span>`;
 
     try {
-      const res = await api.runCode(code);
+      const res = await api.runCode(code, lang);
       if (res.success) {
-        outputConsole.innerHTML = `<span class="text-success"><i class="fa-solid fa-check"></i> Output:</span>\n${res.output || "(Process finished with no output)"}`;
+        outputConsole.innerHTML = `
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="text-success fw-bold"><i class="fa-solid fa-check"></i> Finished Successfully</span>
+            <span class="badge bg-secondary">${res.runtime_ms} ms</span>
+          </div>
+          <pre class="mb-0 text-light" style="font-family: var(--font-code); white-space: pre-wrap;">${res.output || "(Process exited cleanly with no output)"}</pre>
+        `;
       } else {
-        outputConsole.innerHTML = `<span class="text-danger"><i class="fa-solid fa-xmark"></i> Error:</span>\n${res.error || res.output}`;
+        outputConsole.innerHTML = `
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="text-danger fw-bold"><i class="fa-solid fa-xmark"></i> Runtime/Execution Error</span>
+            <span class="badge bg-danger">${res.runtime_ms} ms</span>
+          </div>
+          <pre class="mb-0 text-danger" style="font-family: var(--font-code); white-space: pre-wrap;">${res.error || res.output || "Execution failed"}</pre>
+        `;
       }
     } catch (err) {
       outputConsole.innerHTML = `<span class="text-danger">Failed to run code: ${err.message}</span>`;
@@ -850,31 +980,63 @@ function setupCoding() {
   // Submit Code
   document.getElementById("btn-submit-code")?.addEventListener("click", async () => {
     if (!currentCodingQuestion) return;
-    if (!api.isAuthenticated()) {
-      showToast("Please sign in to record test submissions and earn points.", "error");
-      document.getElementById("btn-open-login")?.click();
-      return;
-    }
 
     const code = document.getElementById("code-editor").value;
+    const lang = document.getElementById("code-language-select")?.value || "python";
     const outputConsole = document.getElementById("code-console-output");
-    outputConsole.innerHTML = '<span class="text-warning"><i class="fa-solid fa-spinner fa-spin"></i> Evaluating company test cases...</span>';
+    outputConsole.innerHTML = `<span class="text-warning"><i class="fa-solid fa-spinner fa-spin"></i> Running ${lang.toUpperCase()} against test suite...</span>`;
 
     try {
-      const res = await api.submitCode(currentCodingQuestion.id, code);
+      const res = await api.submitCode(currentCodingQuestion.id, code, lang);
+      
+      let testcaseHtml = "";
+      if (res.results && res.results.length) {
+        testcaseHtml = `
+          <div class="mt-3 border-top border-secondary border-opacity-25 pt-2">
+            <div class="small fw-bold text-muted mb-2">Test Case Results:</div>
+            <div class="d-flex flex-column gap-2">
+              ${res.results.map((tc) => `
+                <div class="p-2 rounded bg-dark bg-opacity-75 border ${tc.passed ? "border-success border-opacity-50" : "border-danger border-opacity-50"} small">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="fw-bold ${tc.passed ? "text-success" : "text-danger"}">
+                      <i class="fa-solid ${tc.passed ? "fa-circle-check" : "fa-circle-xmark"}"></i> Test Case #${tc.test_case}
+                    </span>
+                    <span class="text-muted">${tc.runtime_ms} ms</span>
+                  </div>
+                  <div class="text-secondary"><strong>Input:</strong> <code>${tc.input || "none"}</code></div>
+                  <div class="text-secondary"><strong>Expected:</strong> <code>${tc.expected}</code></div>
+                  <div class="${tc.passed ? "text-success" : "text-danger"}"><strong>Actual:</strong> <code>${tc.actual || "(empty)"}</code></div>
+                  ${tc.error ? `<div class="text-danger mt-1"><strong>Error:</strong> <code>${tc.error}</code></div>` : ""}
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      }
+
       if (res.status === "passed") {
         outputConsole.innerHTML = `
-          <div class="text-success fw-bold mb-2"><i class="fa-solid fa-circle-check"></i> Accepted (${res.passed}/${res.total} test cases passed)</div>
-          <div class="text-secondary small">Runtime: ${res.runtime_ms} ms | Points Awarded for ${currentCodingQuestion.company || "Target Company"}!</div>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="text-success fw-bold fs-6"><i class="fa-solid fa-circle-check"></i> Accepted (${res.passed}/${res.total} Test Cases Passed)</div>
+            <span class="badge bg-success bg-opacity-25 text-success">Total: ${res.runtime_ms} ms</span>
+          </div>
+          <div class="text-secondary small">Language: <span class="text-info fw-semibold">${lang.toUpperCase()}</span> | Points Awarded to your profile!</div>
+          ${testcaseHtml}
         `;
-        showToast(`Solution Accepted! Points added to your profile.`, "success");
+        showToast("Solution Accepted! Great job!", "success");
         loadDashboard();
         loadCodingQuestions();
+        loadLeaderboard();
       } else {
         outputConsole.innerHTML = `
-          <div class="text-danger fw-bold mb-2"><i class="fa-solid fa-circle-xmark"></i> Wrong Answer (${res.passed}/${res.total} test cases passed)</div>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="text-danger fw-bold fs-6"><i class="fa-solid fa-circle-xmark"></i> Wrong Answer (${res.passed}/${res.total} Passed)</div>
+            <span class="badge bg-danger bg-opacity-25 text-danger">Total: ${res.runtime_ms} ms</span>
+          </div>
+          <div class="text-secondary small">Language: <span class="text-warning fw-semibold">${lang.toUpperCase()}</span> &bull; Check output below:</div>
+          ${testcaseHtml}
         `;
-        showToast("Some test cases failed. Check your logic and try again.", "error");
+        showToast("Some test cases failed. Inspect details in the console.", "error");
       }
     } catch (err) {
       outputConsole.innerHTML = `<span class="text-danger">Submission error: ${err.message}</span>`;
@@ -884,10 +1046,6 @@ function setupCoding() {
   // Bookmark toggle
   document.getElementById("btn-bookmark-question")?.addEventListener("click", async () => {
     if (!currentCodingQuestion) return;
-    if (!api.isAuthenticated()) {
-      showToast("Sign in to bookmark questions", "info");
-      return;
-    }
     try {
       const res = await api.toggleBookmark(currentCodingQuestion.id);
       showToast(res.is_bookmarked ? "Question bookmarked!" : "Bookmark removed", "info");
@@ -1182,44 +1340,249 @@ function appendTypingIndicator() {
 }
 
 // ─────────────────────────────────────────────────────────────
-// 9. Leaderboard Module
+// 9. Leaderboard Module (Podium + Gamified Rankings + Filters)
 // ─────────────────────────────────────────────────────────────
+let leaderboardCache = [];
+
 async function loadLeaderboard() {
   const tbody = document.getElementById("leaderboard-table-body");
+  const podium = document.getElementById("leaderboard-podium");
   if (!tbody) return;
 
   try {
     const users = await api.getLeaderboard();
-    tbody.innerHTML = (users || [])
-      .map(
-        (u, idx) => `
-      <tr>
-        <td class="fw-bold text-center" style="width: 60px;">
-          ${idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`}
-        </td>
-        <td>
-          <div class="d-flex align-items-center gap-2">
-            <div style="width:28px; height:28px; border-radius:50%; background: #334155; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:700;">
-              ${u.full_name ? u.full_name[0].toUpperCase() : "U"}
-            </div>
-            <span class="fw-semibold text-light">${u.full_name}</span>
-          </div>
-        </td>
-        <td class="text-info fw-bold">${u.total_score || 0} pts</td>
-        <td>${u.solved_count || 0}</td>
-        <td><i class="fa-solid fa-fire text-warning me-1"></i> ${u.streak_days || 1}d</td>
-        <td>
-          <span class="badge bg-success bg-opacity-25 text-success">
-            ${(u.total_score || 0) >= 150 ? "Placement Ready" : "In Training"}
-          </span>
-        </td>
-      </tr>
-    `
-      )
-      .join("");
+    leaderboardCache = users || [];
+
+    // Setup filter listeners once
+    setupLeaderboardFilters();
+
+    // Render podium
+    renderLeaderboardPodium(leaderboardCache.slice(0, 3));
+
+    // Render my rank banner
+    renderMyRankBanner(leaderboardCache);
+
+    // Render table
+    renderLeaderboardTable(leaderboardCache);
+
+    // Update header stats
+    const topScoreEl = document.getElementById("lb-top-score");
+    if (topScoreEl && leaderboardCache.length > 0) {
+      topScoreEl.textContent = `${leaderboardCache[0].total_score} pts`;
+    }
+    const contendersEl = document.getElementById("lb-total-contenders");
+    if (contendersEl) {
+      contendersEl.textContent = `${leaderboardCache.length}+`;
+    }
   } catch (err) {
-    tbody.innerHTML = '<tr><td colspan="6" class="text-muted text-center py-3">Could not load leaderboard.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="text-muted text-center py-3">Could not load leaderboard data.</td></tr>';
   }
+}
+
+function renderLeaderboardPodium(top3) {
+  const podium = document.getElementById("leaderboard-podium");
+  if (!podium || !top3.length) return;
+
+  const first = top3[0];
+  const second = top3.length > 1 ? top3[1] : null;
+  const third = top3.length > 2 ? top3[2] : null;
+
+  let html = "";
+
+  // Rank 2 (Silver)
+  if (second) {
+    html += `
+      <div class="podium-card rank-2">
+        <div class="podium-avatar-wrapper">
+          <div class="podium-avatar">${second.full_name ? second.full_name[0] : "2"}</div>
+          <span class="podium-badge">🥈 2nd</span>
+        </div>
+        <div class="fw-bold text-light text-truncate">${second.full_name}</div>
+        <div class="text-muted small">${second.college || "Campus Leader"}</div>
+        <div class="podium-score">${second.total_score} pts</div>
+        <div class="small text-secondary mt-1">
+          <i class="fa-solid fa-fire text-warning"></i> ${second.streak_days}d streak &bull; ${second.solved_count} solved
+        </div>
+      </div>
+    `;
+  }
+
+  // Rank 1 (Gold Champion)
+  if (first) {
+    html += `
+      <div class="podium-card rank-1">
+        <div class="podium-crown"><i class="fa-solid fa-crown text-warning"></i></div>
+        <div class="podium-avatar-wrapper">
+          <div class="podium-avatar">${first.full_name ? first.full_name[0] : "1"}</div>
+          <span class="podium-badge">🥇 Champion</span>
+        </div>
+        <div class="fw-bold text-light fs-5 text-truncate">${first.full_name}</div>
+        <div class="text-warning small fw-semibold">${first.college || "Campus Champion"}</div>
+        <div class="podium-score">${first.total_score} pts</div>
+        <div class="small text-secondary mt-1">
+          <i class="fa-solid fa-fire text-danger"></i> ${first.streak_days}d streak &bull; ${first.solved_count} solved
+        </div>
+      </div>
+    `;
+  }
+
+  // Rank 3 (Bronze)
+  if (third) {
+    html += `
+      <div class="podium-card rank-3">
+        <div class="podium-avatar-wrapper">
+          <div class="podium-avatar">${third.full_name ? third.full_name[0] : "3"}</div>
+          <span class="podium-badge">🥉 3rd</span>
+        </div>
+        <div class="fw-bold text-light text-truncate">${third.full_name}</div>
+        <div class="text-muted small">${third.college || "Campus Contender"}</div>
+        <div class="podium-score">${third.total_score} pts</div>
+        <div class="small text-secondary mt-1">
+          <i class="fa-solid fa-fire text-warning"></i> ${third.streak_days}d streak &bull; ${third.solved_count} solved
+        </div>
+      </div>
+    `;
+  }
+
+  podium.innerHTML = html;
+}
+
+function renderMyRankBanner(users) {
+  const banner = document.getElementById("leaderboard-my-rank");
+  if (!banner) return;
+
+  const currentEmail = api.user?.email || "student@preppilot.com";
+  let myEntry = users.find((u) => u.email === currentEmail) || users[1] || users[0];
+
+  if (!myEntry) return;
+
+  banner.innerHTML = `
+    <div class="d-flex align-items-center gap-3">
+      <div style="width:44px; height:44px; border-radius:50%; background: linear-gradient(135deg, #6366f1, #06b6d4); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.15rem; color:#fff;">
+        ${myEntry.full_name ? myEntry.full_name[0] : "U"}
+      </div>
+      <div>
+        <div class="fw-bold text-light">${myEntry.full_name} <span class="badge bg-primary bg-opacity-25 text-primary ms-1">You</span></div>
+        <div class="text-muted small">${myEntry.college || "Engineering Campus"} &bull; Target: <span class="text-info">${myEntry.target_company || "Google"}</span></div>
+      </div>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <span class="tier-badge ${getTierBadgeClass(myEntry.tier)}">${myEntry.badge || "⚔️ Diamond"}</span>
+      <div class="text-end">
+        <div class="text-info fw-bold fs-6">${myEntry.total_score} pts</div>
+        <div class="text-muted small">Rank #${myEntry.rank} Global</div>
+      </div>
+    </div>
+  `;
+}
+
+function getTierBadgeClass(tier) {
+  const norm = (tier || "").toLowerCase();
+  if (norm.includes("grandmaster")) return "tier-grandmaster";
+  if (norm.includes("master")) return "tier-master";
+  if (norm.includes("diamond")) return "tier-diamond";
+  if (norm.includes("expert")) return "tier-expert";
+  return "tier-rising";
+}
+
+function setupLeaderboardFilters() {
+  const searchInput = document.getElementById("leaderboard-search");
+  const tierFilter = document.getElementById("leaderboard-tier-filter");
+  const sortFilter = document.getElementById("leaderboard-sort-filter");
+
+  const applyFilters = () => {
+    let filtered = [...leaderboardCache];
+    const query = (searchInput?.value || "").toLowerCase().trim();
+    const tier = tierFilter?.value || "all";
+    const sort = sortFilter?.value || "score";
+
+    if (query) {
+      filtered = filtered.filter(
+        (u) =>
+          u.full_name.toLowerCase().includes(query) ||
+          (u.college && u.college.toLowerCase().includes(query)) ||
+          (u.target_company && u.target_company.toLowerCase().includes(query))
+      );
+    }
+
+    if (tier !== "all") {
+      filtered = filtered.filter((u) => u.tier === tier);
+    }
+
+    if (sort === "streak") {
+      filtered.sort((a, b) => b.streak_days - a.streak_days);
+    } else if (sort === "solved") {
+      filtered.sort((a, b) => b.solved_count - a.solved_count);
+    } else {
+      filtered.sort((a, b) => b.total_score - a.total_score);
+    }
+
+    renderLeaderboardTable(filtered);
+  };
+
+  searchInput?.addEventListener("input", applyFilters);
+  tierFilter?.addEventListener("change", applyFilters);
+  sortFilter?.addEventListener("change", applyFilters);
+}
+
+function renderLeaderboardTable(users) {
+  const tbody = document.getElementById("leaderboard-table-body");
+  if (!tbody) return;
+
+  if (!users || !users.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="text-muted text-center py-4">No candidates found matching your filter criteria.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = users
+    .map(
+      (u, idx) => `
+    <tr>
+      <td class="fw-bold text-center" style="width: 70px;">
+        ${u.rank === 1 ? '<span class="fs-5">🥇</span>' : u.rank === 2 ? '<span class="fs-5">🥈</span>' : u.rank === 3 ? '<span class="fs-5">🥉</span>' : `<span class="badge rounded-pill bg-dark border border-secondary border-opacity-50 text-light">#${u.rank}</span>`}
+      </td>
+      <td>
+        <div class="d-flex align-items-center gap-2">
+          <div style="width:34px; height:34px; border-radius:50%; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; font-size:0.85rem; font-weight:700; color:#38bdf8;">
+            ${u.full_name ? u.full_name[0].toUpperCase() : "U"}
+          </div>
+          <div>
+            <div class="fw-semibold text-light">${u.full_name}</div>
+            <div class="text-muted small d-flex align-items-center gap-1">
+              <span>${u.college || "Campus"}</span> &bull; 
+              <span class="badge-company ${getCompanyBadgeClass(u.target_company)} py-0 px-1" style="font-size:0.65rem;">${u.target_company || "General"}</span>
+            </div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <span class="tier-badge ${getTierBadgeClass(u.tier)}">${u.badge || u.tier}</span>
+      </td>
+      <td>
+        <span class="text-info fw-bold">${u.total_score || 0} pts</span>
+      </td>
+      <td>
+        <div class="d-flex align-items-center gap-1">
+          <span class="fw-bold text-light">${u.solved_count || 0}</span>
+          <span class="small text-muted">(${u.easy_solved || 0}E / ${u.med_solved || 0}M / ${u.hard_solved || 0}H)</span>
+        </div>
+      </td>
+      <td>
+        <span class="text-light small">
+          <i class="fa-solid fa-fire text-danger me-1"></i> ${u.streak_days || 1}d
+        </span>
+      </td>
+      <td>
+        <span class="badge ${
+          (u.total_score || 0) >= 200 ? "bg-success text-success" : (u.total_score || 0) >= 100 ? "bg-info text-info" : "bg-secondary text-secondary"
+        } bg-opacity-25">
+          ${(u.total_score || 0) >= 200 ? "Placement Ready" : (u.total_score || 0) >= 100 ? "In High Gear" : "In Training"}
+        </span>
+      </td>
+    </tr>
+  `
+    )
+    .join("");
 }
 
 // ─────────────────────────────────────────────────────────────

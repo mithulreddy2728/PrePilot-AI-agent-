@@ -8,9 +8,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies & compilers (Python, Node.js, C, C++, Java)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    nodejs \
+    default-jdk-headless \
     curl \
     && rm -rf /var/lib/apt/lists/*
 

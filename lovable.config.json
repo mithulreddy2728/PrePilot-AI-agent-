@@ -1,0 +1,20 @@
+{
+  "name": "PrepPilot AI",
+  "slug": "preppilot-ai",
+  "framework": "vanilla-html-js",
+  "root": "frontend",
+  "buildCommand": "echo 'Build complete'",
+  "outputDir": "frontend",
+  "server": {
+    "proxy": {
+      "/api": {
+        "target": "http://127.0.0.1:8000",
+        "changeOrigin": true
+      }
+    }
+  },
+  "env": [
+    "API_BASE_URL",
+    "GEMINI_API_KEY"
+  ]
+}

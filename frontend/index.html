@@ -475,7 +475,15 @@
                 <button type="button" class="company-pill" data-company="Google"><i class="fa-brands fa-google text-danger"></i> Google</button>
                 <button type="button" class="company-pill" data-company="Amazon"><i class="fa-brands fa-amazon text-warning"></i> Amazon</button>
                 <button type="button" class="company-pill" data-company="Microsoft"><i class="fa-brands fa-microsoft text-info"></i> Microsoft</button>
+                <button type="button" class="company-pill" data-company="Meta"><i class="fa-brands fa-facebook text-primary"></i> Meta</button>
+                <button type="button" class="company-pill" data-company="Apple"><i class="fa-brands fa-apple text-light"></i> Apple</button>
+                <button type="button" class="company-pill" data-company="Netflix"><i class="fa-solid fa-film text-danger"></i> Netflix</button>
                 <button type="button" class="company-pill" data-company="Goldman Sachs"><i class="fa-solid fa-coins text-warning"></i> Goldman</button>
+                <button type="button" class="company-pill" data-company="Uber"><i class="fa-solid fa-car text-light"></i> Uber</button>
+                <button type="button" class="company-pill" data-company="Adobe"><i class="fa-solid fa-pen-nib text-danger"></i> Adobe</button>
+                <button type="button" class="company-pill" data-company="Atlassian"><i class="fa-solid fa-layer-group text-info"></i> Atlassian</button>
+                <button type="button" class="company-pill" data-company="Oracle"><i class="fa-solid fa-database text-danger"></i> Oracle</button>
+                <button type="button" class="company-pill" data-company="Walmart"><i class="fa-solid fa-cart-shopping text-warning"></i> Walmart</button>
                 <button type="button" class="company-pill" data-company="Deloitte"><i class="fa-solid fa-chart-line text-success"></i> Deloitte</button>
                 <button type="button" class="company-pill" data-company="Accenture"><i class="fa-solid fa-network-wired text-primary"></i> Accenture</button>
                 <button type="button" class="company-pill" data-company="TCS"><i class="fa-solid fa-laptop-code text-info"></i> TCS</button>
@@ -538,11 +546,26 @@
 
             <!-- Code Editor Wrapper -->
             <div class="code-editor-wrapper flex-grow-1 d-flex flex-column mb-3">
-              <div class="editor-header">
-                <span><i class="fa-brands fa-python text-warning me-1"></i> Python 3 Runtime</span>
-                <span>PrePilot Python Compiler Sandbox</span>
+              <div class="editor-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                  <label for="code-language-select" class="small text-muted mb-0"><i class="fa-solid fa-code text-primary"></i> Lang:</label>
+                  <select id="code-language-select" class="lang-selector-select">
+                    <option value="python" selected>Python 3</option>
+                    <option value="javascript">JavaScript (Node.js)</option>
+                    <option value="cpp">C++ (g++ 17)</option>
+                    <option value="c">C (gcc 11)</option>
+                    <option value="java">Java (OpenJDK)</option>
+                    <option value="php">PHP (v8.x)</option>
+                  </select>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2 text-light" id="btn-reset-code" title="Reset starter code">
+                    <i class="fa-solid fa-rotate-left"></i> Reset
+                  </button>
+                  <span class="small text-muted d-none d-sm-inline">LeetCode-Style Sandbox</span>
+                </div>
               </div>
-              <textarea id="code-editor" class="code-textarea flex-grow-1" spellcheck="false"></textarea>
+              <textarea id="code-editor" class="code-textarea flex-grow-1" spellcheck="false" placeholder="// Write your solution here..."></textarea>
             </div>
 
             <!-- Editor Action Bar -->
@@ -668,22 +691,100 @@
 
     <!-- ==================== VIEW 7: LEADERBOARD ==================== -->
     <section id="view-leaderboard" class="app-view d-none">
-      <div class="glass-panel p-4 mb-4">
-        <h4 class="fw-bold mb-1"><i class="fa-solid fa-trophy text-warning me-2"></i> Placement Preparation Leaderboard</h4>
-        <p class="text-secondary small mb-0">Track top campus contenders based on coding problems solved, preparation consistency, and interview simulation scores.</p>
+      <!-- Leaderboard Header Banner -->
+      <div class="leaderboard-header-banner p-4 mb-4">
+        <div class="row align-items-center">
+          <div class="col-12 col-lg-7">
+            <span class="badge bg-warning text-dark fw-bold mb-2"><i class="fa-solid fa-trophy me-1"></i> Global DSA Arena</span>
+            <h3 class="fw-bold mb-2">Campus Placement Preparation Leaderboard</h3>
+            <p class="text-light text-opacity-75 small mb-0">Live real-time rankings across premier engineering universities, solved problem streaks, and company track mastery.</p>
+          </div>
+          <div class="col-12 col-lg-5 mt-3 mt-lg-0">
+            <div class="d-flex gap-2 justify-content-lg-end flex-wrap">
+              <div class="glass-panel p-2 px-3 text-center">
+                <div class="text-muted small">Contenders</div>
+                <div class="fw-bold text-light" id="lb-total-contenders">16+</div>
+              </div>
+              <div class="glass-panel p-2 px-3 text-center">
+                <div class="text-muted small">Top Score</div>
+                <div class="fw-bold text-warning" id="lb-top-score">360 pts</div>
+              </div>
+              <div class="glass-panel p-2 px-3 text-center">
+                <div class="text-muted small">Longest Streak</div>
+                <div class="fw-bold text-danger"><i class="fa-solid fa-fire"></i> 21d</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
+      <!-- Top 3 Podium Cards -->
+      <div class="podium-section" id="leaderboard-podium">
+        <!-- Dynamically populated top 3 champions -->
+      </div>
+
+      <!-- Current User Standings Banner -->
+      <div class="my-rank-banner" id="leaderboard-my-rank">
+        <div class="d-flex align-items-center gap-3">
+          <div style="width:42px; height:42px; border-radius:50%; background: #6366f1; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.1rem;">
+            P
+          </div>
+          <div>
+            <div class="fw-bold text-light">Priya Sharma (Student) <span class="badge bg-primary bg-opacity-25 text-primary ms-1">You</span></div>
+            <div class="text-muted small">BITS Pilani &bull; Target: Microsoft</div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <span class="tier-badge tier-master"><i class="fa-solid fa-gem"></i> Master Tier</span>
+          <div class="text-end">
+            <div class="text-info fw-bold">310 pts</div>
+            <div class="text-muted small">Rank #2 Global</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters & Search Toolbar -->
+      <div class="glass-panel p-3 mb-3">
+        <div class="row g-2 align-items-center">
+          <div class="col-12 col-md-5">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-dark border-secondary border-opacity-25 text-muted"><i class="fa-solid fa-search"></i></span>
+              <input type="text" id="leaderboard-search" class="form-control form-control-custom" placeholder="Search candidate, college, or target company...">
+            </div>
+          </div>
+          <div class="col-6 col-md-4">
+            <select id="leaderboard-tier-filter" class="form-select form-control-custom form-select-sm">
+              <option value="all">All Competitive Tiers</option>
+              <option value="Grandmaster">👑 Grandmaster (300+ pts)</option>
+              <option value="Master">💎 Master (200-299 pts)</option>
+              <option value="Diamond">⚔️ Diamond (140-199 pts)</option>
+              <option value="Expert">⚡ Expert (80-139 pts)</option>
+              <option value="Rising Star">⭐ Rising Star (&lt;80 pts)</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-3">
+            <select id="leaderboard-sort-filter" class="form-select form-control-custom form-select-sm">
+              <option value="score">Sort by Score Points</option>
+              <option value="streak">Sort by Active Streak</option>
+              <option value="solved">Sort by Problems Solved</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leaderboard Data Table -->
       <div class="glass-panel p-3">
         <div class="table-responsive">
-          <table class="table table-dark table-hover mb-0" style="background: transparent;">
+          <table class="table table-dark table-hover mb-0 align-middle" style="background: transparent;">
             <thead>
               <tr class="text-secondary small border-bottom border-secondary border-opacity-25">
-                <th scope="col">Rank</th>
+                <th scope="col" style="width: 70px;">Rank</th>
                 <th scope="col">Candidate</th>
-                <th scope="col">Score Points</th>
-                <th scope="col">Problems Solved</th>
-                <th scope="col">Active Streak</th>
-                <th scope="col">Readiness Badge</th>
+                <th scope="col">Competitive Tier</th>
+                <th scope="col">Score</th>
+                <th scope="col">Solved (E/M/H)</th>
+                <th scope="col">Consistency</th>
+                <th scope="col">Status</th>
               </tr>
             </thead>
             <tbody id="leaderboard-table-body">

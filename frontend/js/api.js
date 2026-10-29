@@ -3,7 +3,10 @@
  * Handles all REST API communications with the FastAPI backend.
  */
 
-const API_BASE = window.location.origin;
+const API_BASE = window.PREPPILOT_API_URL || 
+  (window.location.origin.includes(":3000") || window.location.origin.includes("lovable.app") 
+    ? "http://127.0.0.1:8000" 
+    : window.location.origin);
 
 class ApiClient {
   constructor() {
